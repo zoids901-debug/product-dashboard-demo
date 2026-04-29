@@ -2608,7 +2608,7 @@ async function loadDailyRange(startDate, endDate) {
 
     const label = startDate === endDate ? startDate : (startDate + ' ~ ' + endDate);
     document.getElementById('period-label').textContent = 'POS 아이템별 판매 데이터 분석 · ' + label + ' (일 단위)';
-    document.title = '인크코피 상품기획 대시보드 — ' + label;
+    document.title = '데모카페 상품기획 대시보드 — ' + label;
     const storeLbl = document.getElementById('store-label');
     if (storeLbl) storeLbl.textContent = selStores.size === 0 ? '' : '● ' + [...selStores].join(' + ') + ' 보는 중';
     status.textContent = '✓ ' + label + ' (' + RAW.length.toLocaleString() + '건, ' + validDates + '/' + dates.length + '일)';
