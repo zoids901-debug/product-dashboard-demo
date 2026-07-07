@@ -8,9 +8,10 @@
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>데모카페 상품기획 대시보드</title>
+<title>데모커피 상품기획 대시보드 · DEMO</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style>
 
@@ -164,6 +165,59 @@ tr:hover td{background:#f8f9fb}
   .fbtn{padding:4px 9px;font-size:10.5px}
 }
 
+
+.mx-range-row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:6px 0 10px; font-size:11px; }
+.mx-range { display:flex; align-items:center; gap:8px; flex:1; min-width:280px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:6px; padding:4px 10px; }
+.mx-range .rs-label { font-weight:700; min-width:50px; color:#374151; }
+.mx-range .rs-wrap { position:relative; flex:1; height:22px; }
+.mx-range .rs-wrap input[type=range] {
+  position:absolute; left:0; right:0; width:100%; pointer-events:none;
+  appearance:none; -webkit-appearance:none; background:transparent;
+  top:0; height:22px; margin:0; outline:none;
+}
+.mx-range .rs-wrap input[type=range]::-webkit-slider-thumb {
+  pointer-events:auto; appearance:none; -webkit-appearance:none;
+  width:14px; height:14px; border-radius:50%; background:#0984e3; border:2px solid #fff; cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,0.25); margin-top:0;
+}
+.mx-range .rs-wrap input[type=range]::-moz-range-thumb {
+  pointer-events:auto; width:14px; height:14px; border-radius:50%; background:#0984e3; border:2px solid #fff; cursor:pointer;
+}
+.mx-range .rs-track { position:absolute; top:9px; left:7px; right:7px; height:4px; background:#dfe6e9; border-radius:2px; pointer-events:none; }
+.mx-range .rs-fill { position:absolute; top:0; height:100%; background:#0984e3; border-radius:2px; }
+.mx-range .rs-val { min-width:120px; text-align:right; font-variant-numeric:tabular-nums; color:#475569; font-size:11px; }
+.mx-range .rs-reset { background:#fff; border:1px solid #cbd5e1; border-radius:4px; padding:2px 8px; font-size:10px; cursor:pointer; color:#475569; }
+.mx-range .rs-reset:hover { background:#f1f5f9; }
+
+/* ── 일자별 매장별 대분류 매출 표 (운영 대시보드 디자인 이식) ── */
+.scd-scroll{overflow:auto;max-height:60vh}
+.scd-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px}
+.scd-table thead tr:first-child th{background:#F8FAFC;font-weight:700;padding:6px 8px;border-bottom:2px solid #E2E8F0;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:50}
+.scd-table thead tr:last-child th{background:#F8FAFC;font-weight:500;color:#64748B;padding:3px 6px;border-bottom:1px solid #E2E8F0;text-align:center;font-size:11px;position:sticky;top:29px;z-index:49}
+.scd-th{white-space:nowrap}
+.scd-sub{white-space:nowrap}
+.scd-table tbody tr:hover{background:#F0F9FF}
+.scd-table tfoot td{background:#F1F5F9;font-weight:700;border-top:2px solid #CBD5E1}
+.scd-date{padding:5px 8px;color:#374151;font-weight:600;white-space:nowrap;text-align:center}
+.scd-dow{padding:5px 4px;color:#6B7280;text-align:center;font-size:11px}
+.scd-td{padding:5px 8px;text-align:right;color:#1E293B;border-bottom:1px solid #F1F5F9;white-space:nowrap}
+.scd-sub-td{font-weight:600;background:#F8FAFC}
+.scd-total{font-weight:700;color:#1E293B}
+.scd-storeend{border-right:2px solid #E2E8F0}
+.scd-wknd .scd-date,.scd-wknd .scd-dow{color:#EF4444}
+.scd-wknd td{background:#FFF5F5}
+.scd-ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0 6px;padding:6px 10px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:6px;font-size:11px}
+.scd-ctrl-label{font-weight:700;color:#475569;margin-right:2px}
+.scd-heat-btn{padding:3px 10px;border:1px solid #CBD5E1;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;color:#475569}
+.scd-heat-btn.on{background:#0EA5E9;color:#fff;border-color:#0EA5E9}
+.scd-mode-btn{padding:3px 10px;border:1px solid #CBD5E1;background:#fff;border-radius:4px;cursor:pointer;font-size:11px;color:#475569}
+.scd-mode-btn.active{background:#0EA5E9;color:#fff;border-color:#0EA5E9}
+.scd-store-chips{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.scd-store-chip{padding:3px 9px;border:1px solid #CBD5E1;background:#fff;border-radius:12px;cursor:pointer;font-size:11px;font-weight:600}
+.scd-store-chip.off{background:#F1F5F9;color:#94A3B8;text-decoration:line-through;border-color:#E2E8F0}
+.scd-table .scd-th{cursor:pointer;user-select:none}
+.scd-table .scd-th:hover{background:#E2E8F0!important}
+
 </style>
 
 </head>
@@ -176,13 +230,13 @@ tr:hover td{background:#f8f9fb}
 
   <div>
 
-    <h1>데모카페 상품기획 대시보드</h1>
+    <h1>데모커피 상품기획 대시보드 · DEMO</h1>
 
     <div class="sub" id="period-label">POS 아이템별 판매 데이터 분석</div>
 
   </div>
 
-  <div style="font-size:11px;opacity:.6">인케이코리아 상품기획팀</div>
+  <div style="font-size:11px;opacity:.6">데모커피 상품기획팀 · 합성 데이터</div>
 
 </div>
 
@@ -210,6 +264,11 @@ tr:hover td{background:#f8f9fb}
 
   <span id="load-status" style="font-size:11px;color:#888"></span>
 
+  <button id="btnExcel" title="현재 기간/매장 기준 엑셀 다운로드" onclick="downloadExcel()"
+    style="margin-left:auto;border:1px solid #10B981;background:#10B981;color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px">
+    <span>⬇</span><span>엑셀</span>
+  </button>
+
   <div id="cat-note" style="display:none;font-size:11px;color:#856404;background:#fffbf0;border:1px solid #ffeaa7;border-radius:6px;padding:5px 12px;margin-top:6px;width:100%"></div>
 
 </div>
@@ -229,6 +288,10 @@ tr:hover td{background:#f8f9fb}
 <div class="kpi-row" id="kpi-row"></div>
 
 <!-- 대분류 비중 + 매장비교 -->
+
+<div id="cat-warning" style="display:none;background:#FEF3C7;border-left:4px solid #F59E0B;padding:10px 14px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px;line-height:1.5">
+  <strong>⚠️ 카테고리 정보 안내</strong> — 선택 기간에 <strong>2024-01 이전</strong> 일자가 포함되어 있습니다. 그 시기엔 OK POS에 카테고리가 <em>"매장메뉴"</em> 단일 분류로만 등록되어 있어 카테고리 차트가 부정확합니다. 정확한 카테고리 분석은 2024-01부터 적용됩니다.
+</div>
 
 <div class="grid2">
 
@@ -322,11 +385,11 @@ tr:hover td{background:#f8f9fb}
 
   <div style="display:flex;gap:16px;margin-bottom:6px;font-size:11px">
 
-    <span class="rank-a">● A등급 (상위 70%)</span>
+    <span class="rank-a">● A등급 (상위 80%)</span>
 
-    <span class="rank-b">● B등급 (70~90%)</span>
+    <span class="rank-b">● B등급 (80~95%)</span>
 
-    <span class="rank-c">● C등급 (하위 10%)</span>
+    <span class="rank-c">● C등급 (하위 5%)</span>
 
   </div>
 
@@ -390,6 +453,30 @@ tr:hover td{background:#f8f9fb}
 
   <div id="mx-excl-panel" style="margin-bottom:8px"></div>
 
+  <div class="mx-range-row" id="mx-range-row">
+    <div class="mx-range">
+      <span class="rs-label">수량(X)</span>
+      <div class="rs-wrap">
+        <div class="rs-track"><div class="rs-fill" id="mx-x-fill"></div></div>
+        <input type="range" id="mx-x-min" min="0" max="100" value="0">
+        <input type="range" id="mx-x-max" min="0" max="100" value="100">
+      </div>
+      <span class="rs-val" id="mx-x-val">0 ~ 0</span>
+      <button class="rs-reset" onclick="resetMxRange('x')">리셋</button>
+    </div>
+    <div class="mx-range">
+      <span class="rs-label">금액(Y)</span>
+      <div class="rs-wrap">
+        <div class="rs-track"><div class="rs-fill" id="mx-y-fill"></div></div>
+        <input type="range" id="mx-y-min" min="0" max="100" value="0">
+        <input type="range" id="mx-y-max" min="0" max="100" value="100">
+      </div>
+      <span class="rs-val" id="mx-y-val">0 ~ 0</span>
+      <button class="rs-reset" onclick="resetMxRange('y')">리셋</button>
+    </div>
+  </div>
+
+
   <div class="grid2">
 
     <div style="position:relative;height:400px"><canvas id="chart-matrix"></canvas></div>
@@ -404,6 +491,16 @@ tr:hover td{background:#f8f9fb}
 
 </div>
 
+<!-- 일자별 매장별 대분류 -->
+
+<div class="card">
+
+  <h2>일자별 매장별 대분류 <span style="font-size:12px;color:#94A3B8;font-weight:400">(일 단위 · 매출/수량 전환, 원·건 전체 자리)</span></h2>
+
+  <div id="store-cat-daily"></div>
+
+</div>
+
 <!-- 대분류 > 중분류 > 소분류 드릴다운 -->
 
 <div class="card">
@@ -415,30 +512,6 @@ tr:hover td{background:#f8f9fb}
     <table id="tbl-cat"></table>
 
   </div>
-
-</div>
-
-<!-- 매장별 TOP 메뉴 -->
-
-<div class="card">
-
-  <h2>매장별 메뉴 전체</h2>
-
-  <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px">
-
-    <div style="display:flex;gap:6px" id="top-cat-filters"></div>
-
-    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-
-      <div class="fbtn active" id="top-excl-btn" onclick="toggleTopExclude()" style="padding:4px 12px;font-size:11px">상위 이상치 제외</div>
-
-      <div id="top-sort-btns" style="display:flex;gap:6px"></div>
-
-    </div>
-
-  </div>
-
-  <div class="grid3" id="store-tops"></div>
 
 </div>
 
@@ -474,7 +547,92 @@ const CAT_OVERRIDE = {
 
   '그린패스트볼': { cat_big: '음료', cat_mid: '음료', cat_small: '그린패스트볼' },
 
+  // 야구공빵 4개입 세트(큐브포스 C00005) — POS 원본 대분류가 '음료>스페셜'로 잘못 등록됨 → 베이커리로 강제(다른 야구공빵과 통일)
+  '야구공빵 4개입 세트': { cat_big: '베이커리', cat_mid: '브레드', cat_small: '일반빵' },
+
+  // 자카파 밀크(시그니처 음료) — 옛 코드 000543은 OKPOS 대분류가 '매장메뉴'라 MD/기타로 떨어짐 → 강제 음료
+  '자카파 밀크': { cat_big: '음료', cat_mid: '공통', cat_small: '시그니처' },
+
+  '자카파_밀크': { cat_big: '음료', cat_mid: '공통', cat_small: '시그니처' },
+
+  '론 자카파 밀크': { cat_big: '음료', cat_mid: '공통', cat_small: '시그니처' },
+
+  '론자카파 밀크': { cat_big: '음료', cat_mid: '공통', cat_small: '시그니처' },
+
+  // 데모로쉐 — 베이커리(브레드)인데 POS 대분류 비표준이라 MD/기타로 떨어짐
+  // OK포스=002292 '데모로쉐'(붙임), 큐브 전환 후=004107 '데모 로쉐'(띄어쓰기) 두 표기 모두 보정
+  '데모로쉐': { cat_big: '베이커리', cat_mid: '브레드', cat_small: '일반빵' },
+
+  '데모 로쉐': { cat_big: '베이커리', cat_mid: '브레드', cat_small: '일반빵' },
+
 };
+
+// 상품명 정규화(캐논) — 같은 상품이 공백/코드 차이로 다른 이름 문자열로 갈라져 대시보드에 중복 표시되던 것 병합.
+// 대시보드는 상품명(item)을 집계 키로 쓰므로, 로딩 시 각 변형을 대표명으로 통일하면 모든 집계(ABC/매트릭스/음료비중 등)가 자동 합산됨.
+// 2026-07-03 전수 스캔(6/1~7/3)으로 확인된 이름변형 8건(큐브포스 7/1 전환 공백/신코드 + 레거시 데모로쉐). 새 변형 생기면 여기에 추가.
+const NAME_CANON = {
+  '수박 주스': '수박주스',
+  '파인 콜라다': '파인콜라다',
+  '데모로쉐': '데모 로쉐',
+  '플레인 퀸아망': '플레인 퀸 아망',
+  '데모 오리진 블렌드 200g': '데모 오리진블렌드 200g',
+  '다크 오리진 블렌드 200g': '다크 오리진블렌드 200g',
+  '쇼핑백(감광지 화이트)': '쇼핑백(감광지화이트)',
+  '바이트박스': '바이트 박스',
+  // 자카파 밀크(시그니처 음료) — 매장/POS별로 코드·이름이 갈라짐: 동탄 옛코드000543='자카파 밀크', 통합003000='자카파_밀크', 김포 토스='론 자카파 밀크'/'론자카파 밀크'. 하나로 병합
+  // (주의: '론자카파 럼배럴 에이지드 200g' 등은 원두라 별개 상품 — 병합 안 함)
+  '자카파_밀크': '자카파 밀크',
+  '론 자카파 밀크': '자카파 밀크',
+  '론자카파 밀크': '자카파 밀크',
+  // 2026-07-07 전수 스캔(6/1~7/7) 통합 10건 — 띄어쓰기/괄호/철자만 다른 확실한 중복.
+  // 김포 커피·티 핫아이스 음료(아메리카노 등)는 이름이 안 겹쳐 자동 제외됨(핫/아이스 API 없음, 별도 유지).
+  '제철)수박 주스': '수박주스',              // 세종 6/29 옛코드 1개
+  '럼_크림커피': '럼 크림커피',               // 언더스코어
+  '리유저블 마켓백': '리유저블마켓백',         // 띄어쓰기
+  '데모 텀블러 스트랩캐리어': '데모 텀블러스트랩 캐리어', // 띄어쓰기
+  '페퍼로니 에멘탈치즈 깜빠뉴': '페퍼로니 에멘탈 치즈 깜파뉴', // 띄어쓰기+철자(파/빠)
+  '고르곤졸라 깜빠뉴': '고르곤졸라 깜파뉴',     // 철자(파/빠)
+  '드립백(데모오리진)': '드립백 데모오리진',   // 괄호vs공백
+  '드립백(벨벳브리즈)': '드립백 벨벳브리즈',   // 괄호vs공백
+  '콜롬비아 디카페인 200g': '콜롬비아 디카페인(200g)', // 괄호vs공백
+  '크랜베리 아몬드 쿠키N': '크랜베리 아몬드 쿠키', // 끝 N 표기(포스 코드 흔적) 제거
+};
+function canonName(name){
+  const n = (name || '').trim();
+  return NAME_CANON[n] || n;
+}
+
+// 키워드 기반 자동 분류 — OK포스 raw cat이 비표준('매장메뉴' 등)이거나 빈값(김포 토스)일 때 fallback
+const _CAT_KW_RULES = [
+  { re: /(아메리카노|라떼|모카|에스프레소|콜드브루|드립커피|블렌드 드립|샷추가|시럽 ?추가|마끼아또|카푸치노|커피$|커피[ \(])/, big: '음료', mid: '음료', small: '커피' },
+  { re: /(레모네이드|에이드|스무디|쉐이크|아이스티|밀크티|얼그레이|차이|녹차|홍차|티$|티[ \(]|주스|쥬스|콤부차|요거트)/, big: '음료', mid: '음료', small: '음료' },
+  { re: /(빵|식빵|크루아상|쿠키|머핀|스콘|타르트|퀸아망|마들렌|휘낭시에|롤|페이스트리|데니쉬|번|컵케이크|치즈케이크|파운드|마카롱|크림빵|소금빵|단팥빵|메론빵|베이글|치아바타|브리오슈|에끌레르|구겔호프|크로플)/, big: '베이커리', mid: '베이커리', small: '베이커리' },
+  { re: /(샌드위치|샐러드|토스트|핫도그|와플|브런치|파니니|랩)/, big: '푸드', mid: '푸드', small: '푸드' },
+  { re: /(원두|드립백|커피파우더|텀블러|머그|쇼핑백|에코백|스트랩|캐리어|굿즈|선물세트|기프트|쇼퍼|보틀|키링|배지)/, big: 'MD/기타', mid: 'MD', small: 'MD' },
+];
+function inferCategory(itemName) {
+  if (!itemName) return null;
+  for (const r of _CAT_KW_RULES) {
+    if (r.re.test(itemName)) return { cat_big: r.big, cat_mid: r.mid, cat_small: r.small };
+  }
+  return null;
+}
+// 정규화: 수동 오버라이드 > raw 대분류 표준이면 그대로 > 비표준 대분류라도 중분류가 표준이면 승격 > 키워드 추론 > raw
+function normalizeCategory(itemName, rawCat) {
+  if (CAT_OVERRIDE[itemName]) return CAT_OVERRIDE[itemName];
+  const big = rawCat && rawCat.cat_big;
+  const STD = ['음료','베이커리','푸드','MD/기타'];
+  if (STD.includes(big)) return rawCat;
+  // 옛 '매장메뉴' 등 비표준 대분류라도 중분류가 표준(음료/베이커리/푸드)이면 그걸 대분류로 승격.
+  // (예: 매장메뉴>음료>시그니처 → 음료). MD는 중분류도 MD라 승격 안 됨 = MD/기타 유지(정상).
+  const mid = rawCat && rawCat.cat_mid;
+  if (['음료','베이커리','푸드'].includes(mid)) {
+    return { cat_big: mid, cat_mid: (rawCat.cat_small || mid), cat_small: (rawCat.cat_small || '') };
+  }
+  const inf = inferCategory(itemName);
+  if (inf) return inf;
+  return rawCat || { cat_big: '', cat_mid: '', cat_small: '' };
+}
 
 // State
 
@@ -487,6 +645,13 @@ let STORES = ['전체'];
 const BIG_COLORS = {'음료':'#0984e3','베이커리':'#e17055','MD/기타':'#00b894','푸드':'#fdcb6e'};
 
 const BIG_ORDER = ['음료','베이커리','푸드','MD/기타'];
+// 차트의 'MD/기타' 그룹: BIG_ORDER에 없는 모든 cat_big (매장메뉴/빈값/기타) + 'MD/기타' 자체
+function groupBig(cb) { return BIG_ORDER.includes(cb) ? cb : 'MD/기타'; }
+function matchBig(rowCb, filterBig) {
+  if (filterBig === '전체') return true;
+  if (filterBig === 'MD/기타') return !['음료','베이커리','푸드'].includes(rowCb);
+  return rowCb === filterBig;
+}
 
 let catExpanded = {};
 
@@ -495,7 +660,20 @@ let catExpanded = {};
 let abcCatBig = '전체';
 let abcWorstOnly = false;
 let ENDED_ITEMS = new Set();  // 단종 상품 (10일 무판매)
-let PRICE_MAP = {};  // 상품명 → 판매가 (POS 정가)
+
+// 단가 마스터 (데모 코드.xlsx 기반 prices.json) — by_code: 코드→{name,sale,...}
+let PRICES = { by_code: {}, by_name: {} };
+
+// 단가 계산: 상품코드로 마스터 정가 조회 → 매출÷수량과 ±5% 이내면 마스터 정가,
+// 벗어나면 매출÷수량(100원 반올림). 코드 없는 상품(김포/과거)은 매출÷수량 fallback.
+function unitPrice(it) {
+  if (!it || !it.qty || it.qty <= 0) return null;
+  const calc = it.net / it.qty;
+  const m = (it.code && PRICES.by_code) ? PRICES.by_code[it.code] : null;
+  const master = m && m.sale > 0 ? m.sale : null;
+  if (master && Math.abs(calc - master) / master <= 0.05) return master;
+  return Math.round(calc / 100) * 100;
+}
 
 let abcCatMid = '전체';
 
@@ -538,6 +716,7 @@ let mxCatBig = '전체';
 let mxExcludeBasic = true;       // 마스터 이상치 제외 토글
 
 let mxExcludeOverrides = new Set(); // 강제 포함 항목 (이상치여도 표시)
+let mxRange = { xMin:null, xMax:null, yMin:null, yMax:null };
 
 let mxTableSort = 'quad';        // 'quad' | 'qty' | 'net'
 
@@ -806,6 +985,7 @@ function updateStoreCompare() {
 
   stores.forEach(store=>{
 
+    // RTD/매장메뉴/빈값 등은 MD/기타로 묶어서 표시
     const sd = RAW.filter(r=>r.store===store);
 
     const total = sd.reduce((s,r)=>s+r.net,0);
@@ -813,8 +993,16 @@ function updateStoreCompare() {
     if(total===0) return;
 
     const byBig = {};
+    const bigMids = {};      // cat → {cat_mid → net}
+    const bigItems = {};     // cat → {item → net}
 
-    sd.forEach(r=>{ byBig[r.cat_big]=(byBig[r.cat_big]||0)+r.net; });
+    sd.forEach(r=>{
+      const cat = BIG_ORDER.includes(r.cat_big) ? r.cat_big : 'MD/기타';
+      byBig[cat] = (byBig[cat]||0) + r.net;
+      const mid = r.cat_mid || '(미분류)';
+      (bigMids[cat] = bigMids[cat] || {})[mid] = (bigMids[cat][mid]||0) + r.net;
+      (bigItems[cat] = bigItems[cat] || {})[r.item] = (bigItems[cat][r.item]||0) + r.net;
+    });
 
     html += `<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:700;margin-bottom:3px">${store} <span style="color:#888;font-weight:400">${M(total)}</span></div>`;
 
@@ -828,17 +1016,15 @@ function updateStoreCompare() {
 
       if(pct<=0) return;
 
-      html += `<div style="width:${pct}%;background:${BIG_COLORS[cat]}" title="${cat} ${P(v,total)}">${pct>8?P(v,total):''}</div>`;
+      // 세부 분포 (cat_mid Top 5 + 상품 Top 5)
+      const midList = Object.entries(bigMids[cat]||{}).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      const itemList = Object.entries(bigItems[cat]||{}).sort((a,b)=>b[1]-a[1]).slice(0,5);
+      const midStr = midList.length ? '\n[중분류]\n' + midList.map(([m,n])=>`  ${m}: ${comma(n)}원 (${P(n,v)})`).join('\n') : '';
+      const itemStr = itemList.length ? '\n[상위 상품]\n' + itemList.map(([i,n],idx)=>`  ${idx+1}. ${i}: ${comma(n)}원 (${P(n,v)})`).join('\n') : '';
+      const tip = `${cat} ${comma(v)}원 (${P(v,total)})${midStr}${itemStr}`;
+      html += `<div style="width:${pct}%;background:${BIG_COLORS[cat]};cursor:help" title="${tip.replace(/"/g,'&quot;')}">${pct>8?P(v,total):''}</div>`;
 
     });
-
-    // BIG_ORDER에 없는 카테고리(매장메뉴, RTD, 빈값 등) 합쳐서 '기타'로 표시 → 우측 끝선 100%
-    let otherV = 0;
-    Object.keys(byBig).forEach(cat=>{ if(!BIG_ORDER.includes(cat)) otherV += byBig[cat]; });
-    if(otherV > 0) {
-      const otherPct = otherV/total*100;
-      html += `<div style="width:${otherPct}%;background:#94a3b8" title="기타 ${P(otherV,total)}">${otherPct>8?P(otherV,total):''}</div>`;
-    }
 
     html += `</div></div>`;
 
@@ -851,8 +1037,6 @@ function updateStoreCompare() {
     html += `<span><i style="background:${BIG_COLORS[cat]}"></i>${cat}</span>`;
 
   });
-
-  html += `<span><i style="background:#94a3b8"></i>기타</span>`;
 
   html += `</div>`;
 
@@ -915,7 +1099,7 @@ function updateABC() {
 
   // 대분류 필터 버튼
 
-  const bigOpts = ['전체',...BIG_ORDER.filter(b=>d.some(r=>r.cat_big===b))];
+  const bigOpts = ['전체',...BIG_ORDER.filter(b => d.some(r => matchBig(r.cat_big, b)))];
 
   renderFilterBtns('abc-cat-filters', bigOpts, abcCatBig, 'setAbcBig');
 
@@ -937,7 +1121,7 @@ function updateABC() {
 
   let dForSmall = d;
 
-  if(abcCatBig!=='전체') dForSmall = dForSmall.filter(r=>r.cat_big===abcCatBig);
+  if(abcCatBig!=='전체') dForSmall = dForSmall.filter(r=>matchBig(r.cat_big, abcCatBig));
 
   if(abcCatMid!=='전체') dForSmall = dForSmall.filter(r=>r.cat_mid===abcCatMid);
 
@@ -970,7 +1154,7 @@ function updateABC() {
 
   let fd = d;
 
-  if(abcCatBig!=='전체') fd = fd.filter(r=>r.cat_big===abcCatBig);
+  if(abcCatBig!=='전체') fd = fd.filter(r=>matchBig(r.cat_big, abcCatBig));
 
   if(abcCatMid!=='전체') fd = fd.filter(r=>r.cat_mid===abcCatMid);
 
@@ -999,7 +1183,9 @@ function updateABC() {
     const monthDays = (f) => {
       const yy = 2000 + parseInt(f.slice(0,2));
       const mm = parseInt(f.slice(2,4));
-      if (yy === 2026 && mm === 4) return 26;  // 4월은 진행 중
+      const now = new Date();
+      // 진행 중인 달은 오늘까지 일수만 (하드코딩 제거 — 과거 '2026-04=26일' 잔재는 버그였음)
+      if (yy === now.getFullYear() && mm === now.getMonth() + 1) return now.getDate();
       return new Date(yy, mm, 0).getDate();
     };
     firstDays  = monthFiles.slice(0, half).reduce((s,f)=>s+monthDays(f), 0);
@@ -1011,9 +1197,10 @@ function updateABC() {
   // 아이템별 집계 + 전반/후반 분할
   const items = {};
   fd.forEach(r=>{
-    if(!items[r.item]) items[r.item]={item:r.item,cat_big:r.cat_big,cat_mid:r.cat_mid,cat_small:r.cat_small||'',qty:0,net:0,qFirst:0,qSecond:0};
+    if(!items[r.item]) items[r.item]={item:r.item,code:'',cat_big:r.cat_big,cat_mid:r.cat_mid,cat_small:r.cat_small||'',qty:0,net:0,qFirst:0,qSecond:0};
     items[r.item].qty+=r.qty;
     items[r.item].net+=r.net;
+    if(r.code && !items[r.item].code) items[r.item].code=r.code;
     if (canTrend) {
       const k = r[trendKey];
       if (firstHalf.has(k)) items[r.item].qFirst += r.qty;
@@ -1086,7 +1273,7 @@ function updateABC() {
 
     i.cum = cum;
 
-    i.rank = cum<=70?'A':cum<=90?'B':'C';
+    i.rank = cum<=80?'A':cum<=95?'B':'C';   // 파레토 정석 A=상위 80%/B 80~95%/C (신메뉴 덱과 통일)
 
   });
 
@@ -1101,7 +1288,7 @@ function updateABC() {
   if(cntEl) cntEl.textContent = q ? matchCount+'개 매칭' : '';
 
   const trendCol = canTrend ? '<th class="r" title="기간 전반 vs 후반 일평균 변화">추세</th>' : '';
-  const priceCol = '<th class="r" title="POS 등록 판매가 (정가)">단가</th>';
+  const priceCol = '<th class="r" title="상품코드로 마스터 정가 조회 → 매출÷수량과 ±5% 이내면 정가, 벗어나면 매출÷수량(100원 반올림). 코드 없는 상품은 매출÷수량">단가</th>';
   let h = '';
   if (abcWorstOnly && !canTrend) {
     h += `<tbody><tr><td colspan="11" style="text-align:center;padding:24px;color:#e17055;font-weight:600;background:#fff5f0">⚠️ 워스트 분석은 2개월 이상 기간 선택이 필요합니다. 상단에서 시작/종료 월을 다르게 설정해주세요.</td></tr></tbody>`;
@@ -1130,7 +1317,9 @@ function updateABC() {
       }
     }
 
-    const price = PRICE_MAP[i.item];
+    // 단가 = 코드로 마스터 정가 조회 → 매출÷수량과 ±5% 이내면 마스터 정가,
+    // 벗어나면 매출÷수량(100원 반올림). 코드 없는 상품(김포/과거)은 매출÷수량 fallback.
+    const price = unitPrice(i);
     const priceCell = price ? `<td class="r">${comma(price)}원</td>` : `<td class="r" style="color:#bbb">-</td>`;
 
     h += `<tr style="${rowStyle};cursor:pointer" onclick="showDrill('${itemEsc}','${catEsc}')" title="클릭하면 일별 판매 추이 보기">
@@ -1141,6 +1330,21 @@ function updateABC() {
       <td class="${rc}">${i.rank}</td>${trendCell}
     </tr>`;
   });
+
+  // 합계 행 (수량·실매출 sum, 단가는 가중평균)
+  const totQty = sorted.reduce((s,i)=>s+i.qty, 0);
+  const totNet = sorted.reduce((s,i)=>s+i.net, 0);
+  const avgPrice = totQty > 0 ? Math.round(totNet/totQty) : 0;
+  h += `<tr style="background:#f1f5f9;font-weight:700;border-top:2px solid #94a3b8;position:sticky;bottom:0">
+    <td colspan="5" style="text-align:right;color:#475569">합계 (${sorted.length}개 상품)</td>
+    <td class="r" title="총매출 ÷ 총수량 = 가중평균 단가">${comma(avgPrice)}원<span style="font-size:9px;color:#94a3b8;font-weight:400;margin-left:2px">평균</span></td>
+    <td class="r">${comma(totQty)}</td>
+    <td class="r">${M(totNet)}</td>
+    <td class="r">100.0%</td>
+    <td class="r">-</td>
+    <td>-</td>
+    ${canTrend ? '<td class="r">-</td>' : ''}
+  </tr>`;
 
   h += '</tbody>';
 
@@ -1202,6 +1406,41 @@ const weekendBgPlugin = {
 
   }
 
+};
+
+// 스택 막대 최상단에 합계 수량 표시 (막대가 너무 많으면 생략 — 툴팁 합계로 대체)
+const stackTotalPlugin = {
+  id: 'stackTotal',
+  afterDatasetsDraw(chart) {
+    const { ctx, chartArea, scales } = chart;
+    const y = scales.y;
+    if (!y) return;
+    const storeIdx = chart.data.datasets
+      .map((d, i) => (d.stack === 'qty' ? i : -1)).filter(i => i >= 0);
+    if (!storeIdx.length) return;
+    const n = chart.data.labels.length;
+    if (n > 40) return;                 // 밀도 가드: 막대 41개 이상이면 라벨 생략
+    const meta0 = chart.getDatasetMeta(storeIdx[0]);
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.font = '700 10px Inter, system-ui, sans-serif';
+    for (let i = 0; i < n; i++) {
+      const total = storeIdx.reduce((s, di) => s + (chart.data.datasets[di].data[i] || 0), 0);
+      if (total <= 0) continue;
+      const bar = meta0.data[i];
+      if (!bar) continue;
+      const x = bar.x;
+      const yTop = Math.max(chartArea.top + 12, y.getPixelForValue(total) - 2);
+      const txt = comma(total);
+      const tw = ctx.measureText(txt).width;
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';   // 배경칩 (선/막대 위에서 가독성)
+      ctx.fillRect(x - tw / 2 - 2, yTop - 12, tw + 4, 12);
+      ctx.fillStyle = '#2d3436';
+      ctx.fillText(txt, x, yTop);
+    }
+    ctx.restore();
+  }
 };
 
 async function showDrill(itemName, catBig) {
@@ -1269,17 +1508,17 @@ async function showDrill(itemName, catBig) {
 
   const STORE_COLORS = {
 
-    '2지점데모': ['rgba(9,132,227,0.75)',  '#0984e3'],
+    '송도': ['rgba(9,132,227,0.75)',  '#0984e3'],
 
-    '1지점데모': ['rgba(0,184,148,0.75)',  '#00b894'],
+    '서초': ['rgba(0,184,148,0.75)',  '#00b894'],
 
-    '5지점데모': ['rgba(253,203,110,0.85)','#fdcb6e'],
+    '세종': ['rgba(253,203,110,0.85)','#fdcb6e'],
 
-    '4지점데모': ['rgba(162,155,254,0.75)','#a29bfe'],
+    '판교': ['rgba(162,155,254,0.75)','#a29bfe'],
 
-    '3지점데모': ['rgba(253,121,168,0.75)','#fd79a8'],
+    '동탄': ['rgba(253,121,168,0.75)','#fd79a8'],
 
-    '6지점데모': ['rgba(85,239,196,0.75)', '#55efc4'],
+    '김포': ['rgba(85,239,196,0.75)', '#55efc4'],
 
   };
 
@@ -1317,7 +1556,7 @@ async function showDrill(itemName, catBig) {
 
       for (const it of items) {
 
-        if (it.item === itemName) {
+        if (canonName(it.item) === itemName) {   // 이름변형 병합 상품(자카파 밀크 등)도 전 매장 집계
 
           storeQty[normS] = (storeQty[normS]||0) + it.qty;
 
@@ -1517,7 +1756,7 @@ async function showDrill(itemName, catBig) {
 
     type: 'bar',
 
-    plugins: [weekendBgPlugin],
+    plugins: [weekendBgPlugin, stackTotalPlugin],
 
     data: {
 
@@ -1606,6 +1845,16 @@ async function showDrill(itemName, catBig) {
               if (c.dataset.label === maLabel) return `${maLabel}: ${c.raw}${unit}`;
 
               return `${c.dataset.label}: ${comma(c.raw)}${unit}`;
+
+            },
+
+            footer: items => {
+
+              const sum = items.filter(it => it.dataset.stack === 'qty')
+
+                .reduce((s, it) => s + (it.raw || 0), 0);
+
+              return `합계 ${comma(sum)}${unit}`;
 
             }
 
@@ -1755,7 +2004,7 @@ function updateStoreTops() {
 
   // 대분류 필터 버튼
 
-  const bigOpts = ['전체',...BIG_ORDER.filter(b=>RAW.some(r=>r.cat_big===b))];
+  const bigOpts = ['전체',...BIG_ORDER.filter(b => RAW.some(r => matchBig(r.cat_big, b)))];
 
   renderFilterBtns('top-cat-filters', bigOpts, topCatBig, 'setTopBig');
 
@@ -1793,7 +2042,7 @@ function updateStoreTops() {
 
     let sd = RAW.filter(r=>r.store===store);
 
-    if(topCatBig!=='전체') sd = sd.filter(r=>r.cat_big===topCatBig);
+    if(topCatBig!=='전체') sd = sd.filter(r=>matchBig(r.cat_big, topCatBig));
 
     if(topCatMid!=='전체') sd = sd.filter(r=>r.cat_mid===topCatMid);
 
@@ -1861,7 +2110,7 @@ function updateStoreTops() {
 
       let sd = RAW.filter(r=>r.store===store);
 
-      if(topCatBig!=='전체') sd = sd.filter(r=>r.cat_big===topCatBig);
+      if(topCatBig!=='전체') sd = sd.filter(r=>matchBig(r.cat_big, topCatBig));
 
       if(topCatMid!=='전체') sd = sd.filter(r=>r.cat_mid===topCatMid);
 
@@ -1916,6 +2165,54 @@ const BASE_MENU_PATTERNS = [
   '바닐라빈 라떼','바닐라빈라떼','바닐라빈 라때','바닐라빈라때',
 ];
 const BASE_MENU_SHARE_THRESHOLD = 2.5; // 매출/수량 비중 중 큰 값 기준
+function setupMxRange(axis, maxData) {
+  const minEl = document.getElementById('mx-'+axis+'-min');
+  const maxEl = document.getElementById('mx-'+axis+'-max');
+  const fillEl = document.getElementById('mx-'+axis+'-fill');
+  const valEl = document.getElementById('mx-'+axis+'-val');
+  if(!minEl || !maxEl) return;
+  maxData = Math.max(1, Math.ceil(maxData));
+  minEl.max = maxData;
+  maxEl.max = maxData;
+  const stored = (axis==='x') ? { mn:mxRange.xMin, mx:mxRange.xMax } : { mn:mxRange.yMin, mx:mxRange.yMax };
+  minEl.value = stored.mn===null ? 0 : Math.min(stored.mn, maxData);
+  maxEl.value = stored.mx===null ? maxData : Math.min(stored.mx, maxData);
+  const fmt = axis==='x' ? (v=>comma(Math.round(v))+'건') : (v=>v>=10000?Math.floor(v/10000)+'만':comma(Math.round(v))+'원');
+  function refresh() {
+    let mn = +minEl.value, mx = +maxEl.value;
+    const realMax = +minEl.max;
+    if(mn > mx) {
+      if(window.event && window.event.target === minEl) { mx = mn; maxEl.value = mx; }
+      else { mn = mx; minEl.value = mn; }
+    }
+    if(fillEl) {
+      fillEl.style.left = (mn/realMax*100) + '%';
+      fillEl.style.width = ((mx-mn)/realMax*100) + '%';
+    }
+    if(valEl) valEl.textContent = fmt(mn) + ' ~ ' + fmt(mx);
+    if(axis==='x') {
+      mxRange.xMin = mn > 0 ? mn : null;
+      mxRange.xMax = mx < realMax ? mx : null;
+    } else {
+      mxRange.yMin = mn > 0 ? mn : null;
+      mxRange.yMax = mx < realMax ? mx : null;
+    }
+  }
+  if(!minEl.dataset.bound) {
+    minEl.addEventListener('input', ()=>{ refresh(); updateMatrix(); });
+    maxEl.addEventListener('input', ()=>{ refresh(); updateMatrix(); });
+    minEl.dataset.bound = '1';
+    maxEl.dataset.bound = '1';
+  }
+  refresh();
+}
+
+function resetMxRange(axis) {
+  if(axis==='x') { mxRange.xMin = null; mxRange.xMax = null; }
+  else { mxRange.yMin = null; mxRange.yMax = null; }
+  updateMatrix();
+}
+
 function detectOutliers(itemList) {
   const totalNet = itemList.reduce((s,i)=>s+(i.net||0), 0);
   const totalQty = itemList.reduce((s,i)=>s+(i.qty||0), 0);
@@ -1923,6 +2220,10 @@ function detectOutliers(itemList) {
   const out = new Set();
   itemList.forEach(i => {
     const nm = i.item || '';
+    // 1) 단가 비정상 (VIP/기프티콘/단체주문 — 단가 30만원 이상)
+    const unit = (i.qty || 0) > 0 ? (i.net || 0) / i.qty : 0;
+    if (unit >= 300000) { out.add(nm); return; }
+    // 2) 베이스 메뉴 점유율 너무 높은 케이스 (기존 룰)
     if (!BASE_MENU_PATTERNS.some(p => nm.includes(p))) return;
     const netPct = totalNet>0 ? (i.net||0)/totalNet*100 : 0;
     const qtyPct = totalQty>0 ? (i.qty||0)/totalQty*100 : 0;
@@ -1937,7 +2238,7 @@ function updateMatrix() {
 
   // 대분류 필터 버튼
 
-  const bigOpts = ['전체',...BIG_ORDER.filter(b=>d.some(r=>r.cat_big===b))];
+  const bigOpts = ['전체',...BIG_ORDER.filter(b => d.some(r => matchBig(r.cat_big, b)))];
 
   renderFilterBtns('mx-cat-filters', bigOpts, mxCatBig, 'setMxBig');
 
@@ -1945,7 +2246,7 @@ function updateMatrix() {
 
   let fd = d;
 
-  if(mxCatBig!=='전체') fd = fd.filter(r=>r.cat_big===mxCatBig);
+  if(mxCatBig!=='전체') fd = fd.filter(r=>matchBig(r.cat_big, mxCatBig));
 
   // 아이템별 집계
 
@@ -2077,6 +2378,16 @@ function updateMatrix() {
 
   }
 
+  // ── 슬라이더 셋업 + 필터 적용 (이상치 제거 후) ──
+  const _xMaxData = list.length ? Math.max(...list.map(i=>i.qty)) : 100;
+  const _yMaxData = list.length ? Math.max(...list.map(i=>i.avg)) : 100;
+  setupMxRange('x', _xMaxData);
+  setupMxRange('y', _yMaxData);
+  if(mxRange.xMin !== null) list = list.filter(i=>i.qty >= mxRange.xMin);
+  if(mxRange.xMax !== null) list = list.filter(i=>i.qty <= mxRange.xMax);
+  if(mxRange.yMin !== null) list = list.filter(i=>i.avg >= mxRange.yMin);
+  if(mxRange.yMax !== null) list = list.filter(i=>i.avg <= mxRange.yMax);
+
   if(list.length===0) {
 
     if(chartMatrix) chartMatrix.destroy();
@@ -2151,7 +2462,7 @@ function updateMatrix() {
 
         x:{title:{display:true,text:'판매수량',font:{size:11}},grid:{color:'#f0f2f5'}},
 
-        y:{title:{display:true,text:'건당 매출(원)',font:{size:11}},grid:{color:'#f0f2f5'},
+        y:{title:{display:true,text:'금액(원)',font:{size:11}},grid:{color:'#f0f2f5'},
 
           ticks:{callback:v=>v>=10000?Math.floor(v/10000)+'만':comma(v)}}
 
@@ -2279,8 +2590,176 @@ function update() {
 
   updateCatTable();
 
-  updateStoreTops();
+  renderStoreCatDaily();
 
+}
+
+// ============================================================
+// 일자별 매장별 대분류 매출 (운영 대시보드 표 디자인 이식)
+// ============================================================
+let SCD_HIDDEN = new Set();
+let SCD_HEAT = false;
+let SCD_MODE = 'net';   // 'net'=매출(만원), 'qty'=수량(건)
+let _scdCache = { key:null, rows:null };  // 일별 집계 캐시 (기간 바뀔 때만 재fetch)
+
+// 현재 선택 기간의 일별 파일을 읽어 {date, store, big, net} 행으로 정규화
+async function scdLoadDaily(){
+  let dates=[];
+  if (LOAD_MODE==='daily' && LOADED_DATES.length){
+    dates=[...LOADED_DATES];
+  } else {
+    for (const m of LOADED_MONTHS){
+      const yy='20'+m.file.slice(0,2), mm=m.file.slice(2,4);
+      const dim=new Date(+yy,+mm,0).getDate();
+      for(let d=1; d<=dim; d++) dates.push(`${yy}-${mm}-${String(d).padStart(2,'0')}`);
+    }
+  }
+  const key = dates.join(',');
+  if (_scdCache.key===key && _scdCache.rows) return _scdCache.rows;
+  const DAILY_BASE = DATA_BASE_URL + 'daily/';
+  const fetched = await Promise.all(dates.map(async dt => {
+    const fname = dt.slice(2,4)+dt.slice(5,7)+dt.slice(8,10)+'.json';
+    try { const r = await fetch(DAILY_BASE + fname, dt===_kstToday()?{cache:'no-store'}:undefined); if(!r.ok) return null; return {date:dt, data:await r.json()}; }
+    catch { return null; }
+  }));
+  const normStore = s => s.endsWith('점') ? s.slice(0,-1) : s;
+  const rows=[];
+  fetched.forEach(res => {
+    if(!res || !res.data || !res.data.stores) return;
+    for(const [store, items] of Object.entries(res.data.stores)){
+      const ns=normStore(store);
+      for(const it of (items||[])){
+        const name=(it.item||'').trim(); if(!name) continue;
+        const norm=normalizeCategory(name, {cat_big:it.cat_big, cat_mid:it.cat_mid, cat_small:it.cat_small});
+        rows.push({ date:res.date, store:ns, big:groupBig(norm.cat_big||'기타'), net:it.net||0, qty:it.qty||0 });
+      }
+    }
+  });
+  _scdCache={key, rows};
+  return rows;
+}
+
+const SCD_BIGCOLS = ['음료','베이커리','푸드','MD/기타'];
+const SCD_LABEL = { '음료':'음료','베이커리':'베이커리','푸드':'푸드','MD/기타':'MD' };
+const SCD_STORE_COLOR = {'송도':'#0984e3','서초':'#00b894','세종':'#fdcb6e','판교':'#a29bfe','동탄':'#fd79a8','김포':'#55efc4'};
+function scdColor(s){ return SCD_STORE_COLOR[s] || SCD_STORE_COLOR[(s||'').replace(/점.*$/,'')] || '#475569'; }
+const scdVal = v => (v && v>0) ? v.toLocaleString() : '-';   // 원/건 전체 자리(일의 자리까지)
+const SCD_DOW = ['일','월','화','수','목','금','토'];
+
+function scdToggleStore(s){ if(SCD_HIDDEN.has(s)) SCD_HIDDEN.delete(s); else SCD_HIDDEN.add(s); renderStoreCatDaily(); }
+function scdToggleHeat(){ SCD_HEAT=!SCD_HEAT; renderStoreCatDaily(); }
+function scdSetMode(m){ SCD_MODE=m; renderStoreCatDaily(); }
+
+function scdCtrl(stores){
+  const chip = s => `<span class="scd-store-chip ${SCD_HIDDEN.has(s)?'off':''}" style="${SCD_HIDDEN.has(s)?'':'color:'+scdColor(s)+';border-color:'+scdColor(s)+'66'}" onclick="scdToggleStore('${s}')">${s}</span>`;
+  return `<div class="scd-ctrl">
+    <span class="scd-ctrl-label">표시</span>
+    <button class="scd-mode-btn ${SCD_MODE==='net'?'active':''}" onclick="scdSetMode('net')">매출(원)</button>
+    <button class="scd-mode-btn ${SCD_MODE==='qty'?'active':''}" onclick="scdSetMode('qty')">수량(건)</button>
+    <span class="scd-ctrl-label" style="margin-left:8px">히트맵</span>
+    <button class="scd-heat-btn ${SCD_HEAT?'on':''}" onclick="scdToggleHeat()">${SCD_HEAT?'ON':'OFF'}</button>
+    <div class="scd-store-chips">${stores.map(chip).join('')}</div>
+  </div>`;
+}
+
+async function renderStoreCatDaily(){
+  const el = document.getElementById('store-cat-daily');
+  if(!el) return;
+
+  // 데이터 소스: 일별모드 RAW엔 date 있음 → 그대로, 월간모드면 일별 파일 fetch
+  let rows;
+  if (RAW.length && RAW[0] && RAW[0].date){
+    rows = RAW.map(r=>({ date:r.date, store:r.store, big:groupBig(r.cat_big), net:r.net, qty:r.qty }));
+  } else {
+    if (!el.querySelector('.scd-table')) el.innerHTML = '<div style="color:#94A3B8;padding:12px">불러오는 중…</div>';
+    rows = await scdLoadDaily();
+  }
+
+  const allStores = selStores.size===0 ? STORES.filter(s=>s!=='전체') : [...selStores];
+  const data = rows.filter(r=>allStores.includes(r.store));
+
+  // 매장별 존재 카테고리 (있는곳만, BIG_ORDER 순서)
+  const storeCats = {};
+  allStores.forEach(s=>{
+    const present = new Set(data.filter(r=>r.store===s).map(r=>r.big));
+    storeCats[s] = SCD_BIGCOLS.filter(b=>present.has(b));
+  });
+  const stores = allStores.filter(s => storeCats[s].length>0);   // 데이터 있는 매장만
+  const visStores = stores.filter(s => !SCD_HIDDEN.has(s));       // 숨김 제외
+
+  const dates = [...new Set(data.map(r=>r.date))].filter(Boolean).sort();
+
+  // 집계 agg[date][store][big] = net 합
+  const agg = {};
+  data.forEach(r=>{
+    (agg[r.date]=agg[r.date]||{});
+    (agg[r.date][r.store]=agg[r.date][r.store]||{});
+    agg[r.date][r.store][r.big]=(agg[r.date][r.store][r.big]||0)+(SCD_MODE==='qty'?(r.qty||0):(r.net||0));
+  });
+
+  if(!dates.length || !visStores.length){
+    el.innerHTML = scdCtrl(stores) + '<div style="color:#94A3B8;padding:12px">데이터 없음 (기간을 선택하거나 일 단위 조회를 사용하세요)</div>';
+    return;
+  }
+
+  // 히트맵 정규화: 카테고리 셀 최대값
+  const cellMax = {};
+  visStores.forEach(s=>storeCats[s].forEach(b=>{
+    let mx=0; dates.forEach(dt=>{ const v=(agg[dt]&&agg[dt][s]&&agg[dt][s][b])||0; if(v>mx)mx=v; });
+    cellMax[s+'|'+b]=mx;
+  }));
+
+  // 헤더 (2줄: 매장 / 대분류+소계)
+  let th1 = '<th class="scd-th" rowspan="2">날짜</th><th class="scd-th" rowspan="2">요일</th>';
+  visStores.forEach(s=>{
+    const span = storeCats[s].length + 1;
+    th1 += `<th class="scd-th scd-storeend" colspan="${span}" style="color:${scdColor(s)}" onclick="scdToggleStore('${s}')" title="클릭해서 숨김">${s}</th>`;
+  });
+  th1 += '<th class="scd-th" rowspan="2">합계</th>';
+  let th2 = '';
+  visStores.forEach(s=>{
+    storeCats[s].forEach(b=>{ th2 += `<th class="scd-sub" style="color:${BIG_COLORS[b]||'#64748B'}">${SCD_LABEL[b]}</th>`; });
+    th2 += '<th class="scd-sub scd-storeend" style="color:#334155">소계</th>';
+  });
+
+  // 본문 (일자별)
+  let bodyHtml='';
+  const colTot = {};
+  dates.forEach(dt=>{
+    const d = new Date(dt); const dow = SCD_DOW[d.getDay()]; const wknd = d.getDay()===0||d.getDay()===6;
+    let cells=''; let rowGrand=0;
+    visStores.forEach(s=>{
+      let storeSub=0;
+      storeCats[s].forEach(b=>{
+        const v=(agg[dt]&&agg[dt][s]&&agg[dt][s][b])||0; storeSub+=v;
+        colTot[s+'|'+b]=(colTot[s+'|'+b]||0)+v;
+        const mx=cellMax[s+'|'+b]||0;
+        const heat = (SCD_HEAT && v>0 && mx>0) ? `background:rgba(14,165,233,${(v/mx*0.28).toFixed(3)})` : '';
+        cells += `<td class="scd-td" style="${heat}">${scdVal(v)}</td>`;
+      });
+      colTot[s+'|소계']=(colTot[s+'|소계']||0)+storeSub;
+      rowGrand+=storeSub;
+      cells += `<td class="scd-td scd-sub-td scd-storeend">${scdVal(storeSub)}</td>`;
+    });
+    colTot['grand']=(colTot['grand']||0)+rowGrand;
+    bodyHtml += `<tr class="${wknd?'scd-wknd':''}"><td class="scd-date">${dt.slice(5)}</td><td class="scd-dow">${dow}</td>${cells}<td class="scd-td scd-total">${scdVal(rowGrand)}</td></tr>`;
+  });
+
+  // 합계행
+  let foot='';
+  visStores.forEach(s=>{
+    storeCats[s].forEach(b=>{ foot += `<td class="scd-td scd-total">${scdVal(colTot[s+'|'+b]||0)}</td>`; });
+    foot += `<td class="scd-td scd-total scd-storeend">${scdVal(colTot[s+'|소계']||0)}</td>`;
+  });
+
+  el.innerHTML = scdCtrl(stores) + `
+    <div class="scd-scroll">
+      <table class="scd-table">
+        <thead><tr>${th1}</tr><tr>${th2}</tr></thead>
+        <tbody>${bodyHtml}</tbody>
+        <tfoot><tr><td class="scd-date scd-total" colspan="2">합계</td>${foot}<td class="scd-td scd-total">${scdVal(colTot['grand']||0)}</td></tr></tfoot>
+      </table>
+    </div>`;
 }
 
 update();
@@ -2295,7 +2774,7 @@ async function loadManifest() {
 
   try {
 
-    const res = await fetch(DATA_BASE_URL + 'manifest.json');
+    const res = await fetch(DATA_BASE_URL + 'manifest.json', { cache: 'no-store' });
 
     if (res.ok) {
 
@@ -2321,13 +2800,12 @@ async function loadManifest() {
     }
   } catch(e) { console.log('No ended_items.json'); }
 
-  // 상품 단가 로드 (POS 정가)
+  // 단가 마스터 로드 (코드 기반 정가 검증용)
   try {
     const r3 = await fetch(DATA_BASE_URL + 'prices.json');
     if (r3.ok) {
-      const pj = await r3.json();
-      PRICE_MAP = pj.by_name || {};
-      console.log('단가 로드:', Object.keys(PRICE_MAP).length, '개');
+      PRICES = await r3.json();
+      console.log('단가 마스터:', Object.keys(PRICES.by_code || {}).length, '개 코드');
     }
   } catch(e) { console.log('No prices.json'); }
 
@@ -2352,7 +2830,7 @@ async function loadManifest() {
 
   } else {
 
-    document.getElementById('load-status').textContent = '\ub370\uc774\ud130 \ud30c\uc77c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.';
+    document.getElementById('load-status').textContent = '데이터 파일이 없습니다.';
 
   }
 
@@ -2369,6 +2847,10 @@ function onRangeChange() {
   const t = document.getElementById('month-to').value;
 
   syncFloatSelects();
+
+  // 카테고리 안내: 2024-01(2401) 이전 포함 시 표시
+  const warn = document.getElementById('cat-warning');
+  if (warn) warn.style.display = (f && f < '2401') ? 'block' : 'none';
 
   if (!f || !t) return;
 
@@ -2404,13 +2886,13 @@ async function loadRange(fromFile, toFile) {
 
   overlay.id = 'loading-overlay';
 
-  overlay.textContent = '\ub370\uc774\ud130 \ub85c\ub529 \uc911...';
+  overlay.textContent = '데이터 로딩 중...';
 
   document.body.appendChild(overlay);
 
   const status = document.getElementById('load-status');
 
-  status.textContent = '\ub85c\ub529 \uc911...';
+  status.textContent = '로딩 중...';
 
   try {
 
@@ -2420,32 +2902,38 @@ async function loadRange(fromFile, toFile) {
 
     const months = AVAILABLE_MONTHS.slice(Math.min(fi,ti), Math.max(fi,ti)+1);
 
-    // Fetch all months in range
+    // Fetch all months in range (현재월 파일은 매일 갱신되므로 캐시 안 함)
+
+    const _curMonthFile = _kstToday().slice(2,7).replace('-','') + '.json';
 
     const results = await Promise.all(months.map(m =>
 
-      fetch(DATA_BASE_URL + m.file).then(r => { if(!r.ok) throw new Error(m.file+' HTTP '+r.status); return r.json(); })
+      fetch(DATA_BASE_URL + m.file, m.file===_curMonthFile ? {cache:'no-store'} : undefined).then(r => { if(!r.ok) throw new Error(m.file+' HTTP '+r.status); return r.json(); })
 
     ));
 
     // Merge — 실제 판매 데이터 있는 매장만 추출
 
-    // 매장명 통일: '1지점데모점' → '1지점데모' (점 suffix 제거)
+    // 매장명 통일: '서초점' → '서초' (점 suffix 제거)
 
     const normStore = s => s.endsWith('점') ? s.slice(0, -1) : s;
 
     // 각 row에 month 정보 부착 (워스트 추세 분석용)
     const allItems = results.flatMap((d, idx) => (d.items || []).map(r => ({...r, month: months[idx].file})))
       .map(r => {
-        const ov = CAT_OVERRIDE[r.item];
-        return ov ? {...r, store: normStore(r.store), ...ov} : {...r, store: normStore(r.store)};
+        const item = canonName(r.item);   // 이름변형 중복 병합
+        const norm = normalizeCategory(item, {cat_big: r.cat_big, cat_mid: r.cat_mid, cat_small: r.cat_small});
+        return {...r, item, store: normStore(r.store), ...norm};
       });
 
-    const activeStores = [...new Set(allItems.map(r => r.store))].sort();
+    const STORE_ORDER_STD = ['판교','송도','서초','동탄','세종','김포'];
+    const _present = [...new Set(allItems.map(r => r.store))];
+    const activeStores = STORE_ORDER_STD.filter(s => _present.includes(s))
+        .concat(_present.filter(s => !STORE_ORDER_STD.includes(s)));
 
     RAW = allItems;
 
-    STORES = ['\uc804\uccb4', ...activeStores];
+    STORES = ['전체', ...activeStores];
 
     LOADED_MONTHS = months;
     LOADED_DATES  = [];
@@ -2463,15 +2951,15 @@ async function loadRange(fromFile, toFile) {
 
       : months[0].label;
 
-    document.getElementById('period-label').textContent = 'POS \uc544\uc774\ud15c\ubcc4 \ud310\ub9e4 \ub370\uc774\ud130 \ubd84\uc11d \u00b7 ' + label;
+    document.getElementById('period-label').textContent = 'POS 아이템별 판매 데이터 분석 · ' + label;
 
-    document.title = '\uc778\ud06c\ucf54\ud53c \uc0c1\ud488\uae30\ud68d \ub300\uc2dc\ubcf4\ub4dc \u2014 ' + label;
+    document.title = '데모커피 상품기획 대시보드 · DEMO — ' + label;
 
     const storeLbl = document.getElementById('store-label');
 
-    if(storeLbl) storeLbl.textContent = selStores.size===0 ? '' : '\u25cf ' + [...selStores].join(' + ') + ' \ubcf4\ub294 \uc911';
+    if(storeLbl) storeLbl.textContent = selStores.size===0 ? '' : '● ' + [...selStores].join(' + ') + ' 보는 중';
 
-    status.textContent = '\u2713 ' + label + ' (' + RAW.length.toLocaleString() + '\uac74)';
+    status.textContent = '✓ ' + label + ' (' + RAW.length.toLocaleString() + '건)';
 
     status.style.color = '#00b894';
 
@@ -2487,9 +2975,11 @@ async function loadRange(fromFile, toFile) {
 
     update();
 
+    refreshDrillIfOpen();  // 단일 상품 그래프 열려있으면 새 기간으로 자동 갱신
+
   } catch(e) {
 
-    status.textContent = '\u274c \ub85c\ub4dc \uc2e4\ud328: ' + e.message;
+    status.textContent = '❌ 로드 실패: ' + e.message;
 
     status.style.color = '#e17055';
 
@@ -2509,18 +2999,38 @@ async function loadRange(fromFile, toFile) {
 // 일 단위 모드 (loadDailyRange)
 // ============================================================
 
-async function loadDailyRange(startDate, endDate) {
+// KST 오늘 (실시간 함수가 내려주는 date 와 동일 기준)
+function _kstToday() {
+  return new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10);
+}
+// 오늘이 범위에 포함되면 1분 뒤 silent 재로드(=오늘 /api/prod-live 재호출). 매 로드마다 재무장.
+let _prodLiveTimer = null;
+function _scheduleProdLive(startDate, endDate) {
+  if (_prodLiveTimer) { clearTimeout(_prodLiveTimer); _prodLiveTimer = null; }
+  const t = _kstToday();
+  if (!(startDate <= t && t <= endDate)) return;
+  _prodLiveTimer = setTimeout(function () {
+    if (LOAD_MODE === 'daily' && LOADED_DATES && LOADED_DATES.indexOf(t) >= 0) {
+      loadDailyRange(startDate, endDate, true);
+    }
+  }, 60000);
+}
+
+async function loadDailyRange(startDate, endDate, silent) {
   if (!startDate || !endDate) return;
   if (startDate > endDate) { const t = startDate; startDate = endDate; endDate = t; }
 
-  const overlay = document.createElement('div');
-  overlay.className = 'loading-overlay';
-  overlay.id = 'loading-overlay';
-  overlay.textContent = '일별 데이터 로딩 중...';
-  document.body.appendChild(overlay);
+  let overlay = null;
+  if (!silent) {
+    overlay = document.createElement('div');
+    overlay.className = 'loading-overlay';
+    overlay.id = 'loading-overlay';
+    overlay.textContent = '일별 데이터 로딩 중...';
+    document.body.appendChild(overlay);
+  }
 
   const status = document.getElementById('load-status');
-  status.textContent = '로딩 중...';
+  if (!silent) status.textContent = '로딩 중...';
 
   try {
     // 날짜 리스트 생성 (YYYY-MM-DD)
@@ -2539,8 +3049,16 @@ async function loadDailyRange(startDate, endDate) {
 
     // 일별 파일 + 카테고리 월별 동시 fetch
     const DAILY_BASE = DATA_BASE_URL + 'daily/';
+    let _liveFetched = false;
     const [dailyResults, catMap] = await Promise.all([
       Promise.all(dates.map(async dt => {
+        // 오늘이면 실시간 함수(/api/prod-live) 우선 — 통합본에서만 존재, 옛 github.io는 404 → 정적 폴백
+        if (dt === _kstToday()) {
+          try {
+            const lr = await fetch('/api/prod-live', { cache: 'no-store' });
+            if (lr.ok) { const lj = await lr.json(); if (lj && lj.stores) { _liveFetched = true; return { date: dt, data: lj }; } }
+          } catch {}
+        }
         const fname = dt.slice(2,4) + dt.slice(5,7) + dt.slice(8,10) + '.json';
         try {
           const r = await fetch(DAILY_BASE + fname);
@@ -2579,25 +3097,30 @@ async function loadDailyRange(startDate, endDate) {
       for (const [store, items] of Object.entries(res.data.stores || {})) {
         const ns = normStore(store);
         for (const it of items) {
-          const name = (it.item || '').trim();
-          if (!name) continue;
-          const ov = CAT_OVERRIDE[name];
-          const cm = catMap[name] || {};
+          const rawname = (it.item || '').trim();
+          if (!rawname) continue;
+          const name = canonName(rawname);   // 이름변형 중복 병합(수박 주스→수박주스 등)
+          const cm = catMap[rawname] || catMap[name] || {};
+          // normalize: 수동 OVERRIDE > raw가 표준이면 그대로 > 키워드 추론 > catMap 학습값 > '기타'
+          const norm = normalizeCategory(name, {cat_big: it.cat_big || cm.cat_big, cat_mid: it.cat_mid || cm.cat_mid, cat_small: it.cat_small || cm.cat_small});
           allItems.push({
             store:     ns,
             item:      name,
             qty:       it.qty || 0,
             net:       it.net || 0,
             date:      res.date,
-            cat_big:   ov ? ov.cat_big   : (cm.cat_big   || '기타'),
-            cat_mid:   ov ? ov.cat_mid   : (cm.cat_mid   || ''),
-            cat_small: ov ? ov.cat_small : (cm.cat_small || ''),
+            cat_big:   norm.cat_big || '기타',
+            cat_mid:   norm.cat_mid || '',
+            cat_small: norm.cat_small || '',
           });
         }
       }
     });
 
-    const activeStores = [...new Set(allItems.map(r => r.store))].sort();
+    const STORE_ORDER_STD = ['판교','송도','서초','동탄','세종','김포'];
+    const _present = [...new Set(allItems.map(r => r.store))];
+    const activeStores = STORE_ORDER_STD.filter(s => _present.includes(s))
+        .concat(_present.filter(s => !STORE_ORDER_STD.includes(s)));
 
     RAW = allItems;
     STORES = ['전체', ...activeStores];
@@ -2608,14 +3131,17 @@ async function loadDailyRange(startDate, endDate) {
 
     const label = startDate === endDate ? startDate : (startDate + ' ~ ' + endDate);
     document.getElementById('period-label').textContent = 'POS 아이템별 판매 데이터 분석 · ' + label + ' (일 단위)';
-    document.title = '데모카페 상품기획 대시보드 — ' + label;
+    document.title = '데모커피 상품기획 대시보드 · DEMO — ' + label;
     const storeLbl = document.getElementById('store-label');
     if (storeLbl) storeLbl.textContent = selStores.size === 0 ? '' : '● ' + [...selStores].join(' + ') + ' 보는 중';
-    status.textContent = '✓ ' + label + ' (' + RAW.length.toLocaleString() + '건, ' + validDates + '/' + dates.length + '일)';
+    status.textContent = '✓ ' + label + ' (' + RAW.length.toLocaleString() + '건, ' + validDates + '/' + dates.length + '일)'
+        + (_liveFetched ? ' · 실시간' : '');
     status.style.color = '#00b894';
     document.getElementById('cat-note').style.display = 'none';
 
     update();
+    refreshDrillIfOpen();  // 단일 상품 그래프 열려있으면 새 기간으로 자동 갱신
+    _scheduleProdLive(startDate, endDate);
   } catch (e) {
     status.textContent = '❌ 로드 실패: ' + e.message;
     status.style.color = '#e17055';
@@ -2650,10 +3176,237 @@ window.loadDateRange  = loadDateRange;
 window.loadDailyRange = loadDailyRange;
 window.loadRange      = loadRange;
 
+// ── 엑셀 다운로드 (현재 기간 + 활성 매장 기준 — 일자별 백업) ───────────────
+async function downloadExcel() {
+  if (typeof XLSX === 'undefined') { alert('엑셀 라이브러리 로드 중. 잠시 후 다시'); return; }
+  if (!LOADED_MONTHS || !LOADED_MONTHS.length) { alert('데이터가 로드되지 않았습니다'); return; }
+
+  // 기간 → 일자 list (start_month 1일 ~ end_month 말일, 미래는 제외)
+  const startYM = LOADED_MONTHS[0].period; // "2024-01"
+  const endYM   = LOADED_MONTHS[LOADED_MONTHS.length-1].period;
+  const startDate = new Date(startYM + '-01T00:00:00');
+  const endDate = new Date(endYM + '-01T00:00:00');
+  endDate.setMonth(endDate.getMonth() + 1, 0);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dates = [];
+  for (let d = new Date(startDate); d <= endDate && d <= today; d.setDate(d.getDate()+1)) {
+    dates.push(new Date(d));
+  }
+
+  const yymd = d => {
+    const y = String(d.getFullYear()).slice(2);
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return y + m + dd;
+  };
+  const iso = d => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${dd}`;
+  };
+
+  // 진행 모달 (진행률, 속도, 잔여시간)
+  let modal = document.getElementById('excel-progress');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'excel-progress';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:inherit';
+    modal.innerHTML = `
+      <div style="background:#fff;border-radius:12px;padding:22px 28px;min-width:380px;box-shadow:0 8px 24px rgba(0,0,0,.25)">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px;color:#1E293B">엑셀 다운로드 준비 중</div>
+        <div style="height:10px;background:#E5E7EB;border-radius:5px;overflow:hidden;margin-bottom:10px">
+          <div id="excel-bar" style="height:100%;background:linear-gradient(90deg,#10B981,#059669);width:0;transition:width .3s"></div>
+        </div>
+        <div id="excel-status" style="font-size:12px;color:#64748B;display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <span id="excel-line1">준비 중...</span>
+          <span id="excel-line2" style="font-variant-numeric:tabular-nums"></span>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+  }
+  modal.style.display = 'flex';
+  const bar    = document.getElementById('excel-bar');
+  const line1  = document.getElementById('excel-line1');
+  const line2  = document.getElementById('excel-line2');
+  const t0 = Date.now();
+
+  // daily fetch (배치 50개씩 동시)
+  const dailyData = [];
+  const BATCH = 50;
+  for (let i = 0; i < dates.length; i += BATCH) {
+    const batch = dates.slice(i, i + BATCH);
+    const results = await Promise.all(batch.map(async d => {
+      try {
+        const r = await fetch(DATA_BASE_URL + 'daily/' + yymd(d) + '.json');
+        if (!r.ok) return null;
+        const doc = await r.json();
+        return { date: iso(d), stores: doc.stores || {} };
+      } catch { return null; }
+    }));
+    results.filter(Boolean).forEach(x => dailyData.push(x));
+    const cur = Math.min(i + BATCH, dates.length);
+    const pct = dates.length > 0 ? cur/dates.length*100 : 0;
+    const elapsed = (Date.now() - t0) / 1000;
+    const speed = cur > 0 ? cur/elapsed : 0;
+    const remaining = speed > 0 ? (dates.length-cur)/speed : 0;
+    bar.style.width = pct.toFixed(1) + '%';
+    line1.textContent = `${cur}/${dates.length}일 (${pct.toFixed(0)}%) · ${speed.toFixed(0)}일/초`;
+    line2.textContent = `경과 ${elapsed.toFixed(0)}s · 잔여 ${remaining.toFixed(0)}s`;
+    await new Promise(r => setTimeout(r, 0));  // UI flush
+  }
+  bar.style.width = '100%';
+  line1.textContent = '엑셀 파일 생성 중...';
+  line2.textContent = `${dates.length}/${dates.length}일`;
+  await new Promise(r => setTimeout(r, 50));
+
+  // 매장 필터
+  const wantStores = (selStores.size === 0) ? null : selStores;
+
+  // 카테고리 fallback map: 상품명 → cat_* (RAW의 월별 데이터 + 다른 daily 일자 기반)
+  const itemCat = {};
+  // 1) 월별 RAW에서 카테고리 학습 (가장 신뢰)
+  if (RAW && RAW.length) {
+    RAW.forEach(r => {
+      if (!itemCat[r.item] && (r.cat_big || r.cat_mid || r.cat_small)) {
+        itemCat[r.item] = {cat_big: r.cat_big||'', cat_mid: r.cat_mid||'', cat_small: r.cat_small||''};
+      }
+    });
+  }
+  // 2) daily 결과에서 카테고리 가진 첫 entry로 보강
+  dailyData.forEach(({stores: storeMap}) => {
+    Object.values(storeMap).forEach(arr => {
+      arr.forEach(r => {
+        if (!itemCat[r.item] && (r.cat_big || r.cat_mid || r.cat_small)) {
+          itemCat[r.item] = {cat_big: r.cat_big||'', cat_mid: r.cat_mid||'', cat_small: r.cat_small||''};
+        }
+      });
+    });
+  });
+
+  // 매장 × 일자 × 상품 grain — daily fetch 결과 기반
+  const agg = {}; // {store: [{date, item, qty, net, cat_*}, ...]}
+  const sumByStore = {}; // {store: {qty, net, items:Set, days:Set}}
+
+  dailyData.forEach(({date, stores: storeMap}) => {
+    Object.entries(storeMap).forEach(([store, arr]) => {
+      if (wantStores && !wantStores.has(store)) return;
+      arr.forEach(r => {
+        // 우선순위: normalize(수동 OVERRIDE > raw 표준 > 키워드 추론) > itemCat(RAW 학습) > 빈값
+        const rawCat = (r.cat_big || r.cat_mid || r.cat_small) ? {cat_big: r.cat_big||'', cat_mid: r.cat_mid||'', cat_small: r.cat_small||''} : (itemCat[r.item] || {});
+        const cat = normalizeCategory(r.item, rawCat);
+        if (!agg[store]) agg[store] = [];
+        agg[store].push({date, item: r.item, qty: r.qty||0, net: r.net||0, ...cat});
+        if (!sumByStore[store]) sumByStore[store] = {qty:0, net:0, items:new Set(), days:new Set()};
+        sumByStore[store].qty += r.qty || 0;
+        sumByStore[store].net += r.net || 0;
+        sumByStore[store].items.add(r.item);
+        sumByStore[store].days.add(date);
+      });
+    });
+  });
+
+  const wb = XLSX.utils.book_new();
+  const stores = Object.keys(agg).sort();
+
+  // 합계 시트
+  const sumRows = [['매장','일수','상품수','판매수량 합','매출액 합']];
+  stores.forEach(s => {
+    const v = sumByStore[s];
+    sumRows.push([s, v.days.size, v.items.size, v.qty, v.net]);
+  });
+  const wsSum = XLSX.utils.aoa_to_sheet(sumRows);
+  wsSum['!cols'] = [{wch:8},{wch:8},{wch:10},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, wsSum, '합계');
+
+  // 매장별 시트 (날짜 + 상품)
+  stores.forEach(s => {
+    const rows = [['날짜','상품','대분류','중분류','소분류','판매수량','매출액']];
+    const arr = agg[s];
+    arr.sort((a,b) => a.date.localeCompare(b.date) || (b.net - a.net));
+    arr.forEach(v => rows.push([v.date, v.item, v.cat_big, v.cat_mid, v.cat_small, v.qty, v.net]));
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws['!cols'] = [{wch:12},{wch:30},{wch:12},{wch:12},{wch:14},{wch:10},{wch:14}];
+    XLSX.utils.book_append_sheet(wb, ws, s.length > 28 ? s.slice(0,28) : s);
+  });
+
+  // 모달 닫기
+  if (modal) modal.style.display = 'none';
+
+  // 파일명: 기간 라벨 사용
+  let fname = '데모커피_상품매출';
+  if (LOADED_MONTHS && LOADED_MONTHS.length) {
+    const f = LOADED_MONTHS[0].period;
+    const t = LOADED_MONTHS[LOADED_MONTHS.length-1].period;
+    fname += `_${f}_${t}`;
+  }
+  XLSX.writeFile(wb, fname + '.xlsx');
+}
+window.downloadExcel = downloadExcel;
+
 // Initialize
 
 loadManifest();
 
+</script>
+<script>
+
+// ── postMessage 동기화 (부모 셸과 통신) ──
+function _prodApplySync(p) {
+  try {
+    if (!p) return;
+    // 매장 상태 (selStores)
+    if (Array.isArray(p.stores) && typeof selStores !== 'undefined') {
+      selStores.clear();
+      // 부모가 전체 선택을 보낼 때는 비워두는 게 기존 룰
+      const allCnt = (typeof STORES !== 'undefined') ? STORES.filter(s=>s!=='전체').length : 6;
+      if (p.stores.length !== allCnt) p.stores.forEach(s => selStores.add(s));
+      const lbl = document.getElementById('store-label');
+      if (lbl) lbl.textContent = selStores.size===0 ? '' : '● ' + [...selStores].join(' + ') + ' 보는 중';
+    }
+    // 날짜 범위 (loadDateRange가 일/월 자동 분기)
+    if (p.period && p.period.start && p.period.end) {
+      if (typeof loadDateRange === 'function') {
+        loadDateRange(p.period.start, p.period.end);
+      } else if (typeof onRangeChange === 'function') {
+        const mf = document.getElementById('month-from');
+        const mt = document.getElementById('month-to');
+        if (mf && mt) {
+          const fromYM = p.period.start.slice(0,7);
+          const toYM   = p.period.end.slice(0,7);
+          const yymmFrom = fromYM.slice(2,4) + fromYM.slice(5,7);
+          const yymmTo   = toYM.slice(2,4) + toYM.slice(5,7);
+          const find = (el, cands) => {
+            for (const c of cands) for (const o of el.options) if (o.value === c) return c;
+            const sorted = [...el.options].map(o=>o.value).filter(v=>v).sort();
+            let best = sorted[0];
+            for (const v of sorted) if (v <= cands[cands.length-1]) best = v;
+            return best;
+          };
+          mf.value = find(mf, [fromYM+'.json', yymmFrom+'.json', fromYM, yymmFrom]);
+          mt.value = find(mt, [toYM+'.json',   yymmTo+'.json',   toYM,   yymmTo]);
+          onRangeChange();
+        }
+      } else if (typeof update === 'function') {
+        update();
+      }
+    }
+  } catch (e) { console.warn('[product applySync]', e); }
+}
+window.addEventListener('message', (e) => {
+  const m = e.data;
+  if (!m || m.type !== 'inkc:sync') return;
+  _prodApplySync(m.payload);
+  try { window.parent.postMessage({ type: 'inkc:synced', tab: 'product' }, '*'); } catch (_) {}
+});
+if (window.parent !== window) {
+  // loadDateRange/onRangeChange 등 핵심 함수 준비된 다음에 ready 보내기
+  const sendReady = () => {
+    try { window.parent.postMessage({ type: 'inkc:ready', tab: 'product' }, '*'); } catch (_) {}
+  };
+  if (typeof loadDateRange === 'function' || typeof onRangeChange === 'function') sendReady();
+  else setTimeout(sendReady, 300);
+}
 </script>
 
 </body>
